@@ -1,0 +1,9 @@
+CREATE TABLE test(
+	id INT PRIMARY KEY AUTO_INCREMENT, 
+	title VARCHAR(20), 
+	content TEXT, 
+	rmYn CHAR(1), 
+	regDate TIMESTAMP, 
+	rmDate DATETIME DEFAULT NULL,
+	inquiryCount BIGINT DEFAULT 0
+)

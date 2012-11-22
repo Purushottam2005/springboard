@@ -3,9 +3,14 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:beans="http://www.springframework.org/schema/beans"
 	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:tx="http://www.springframework.org/schema/tx"
 	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
 
 	<!-- DispatcherServlet Context: defines this servlet's request-processing infrastructure -->
 	
@@ -22,7 +27,63 @@
 	</beans:bean>
 	
 	<context:component-scan base-package="kr.co.jkonury" />
+	<context:annotation-config/>
+	<tx:annotation-driven/>
+	
+	<beans:bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter" >
+		<beans:property name="order" value="1"/>
+		<beans:property name="messageConverters">
+			<beans:list>
+				<beans:bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter" />
+			</beans:list>
+		</beans:property>
+	</beans:bean>
 	
 	
+	<!-- dbcp config -->
+	<context:property-placeholder location="classpath:db.properties"/>
+	<beans:bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+		<beans:property name="driverClassName" value="${dbcp.driverClassName}" />
+		<beans:property name="url" value="${dbcp.url}" />
+		<beans:property name="username" value="${dbcp.username}" />
+		<beans:property name="password" value="${dbcp.password}" />
+	</beans:bean>
 	
+	<beans:bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager" >
+		<beans:property name="dataSource" ref="dataSource"/>
+	</beans:bean>
+	
+	<!-- myBatis -->
+	<beans:bean id="sessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<beans:property name="dataSource" ref="dataSource" />
+		<beans:property name="configLocation" value="classpath:sqlMapConfig.xml" />
+		<!-- 
+		<beans:property name="mapperLocations" value="classpath:query/*.xml" />
+		 -->
+	</beans:bean>
+	
+	<beans:bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate"> 
+  		<beans:constructor-arg index="0" ref="sessionFactory" /> 
+	</beans:bean> 
+	
+	<!-- file resolver -->
+	<beans:bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<beans:property name="defaultEncoding" value="ISO-8859-1"/>
+		<beans:property name="maxUploadSize" value="100000000"/>
+	</beans:bean>
+	
+	<!-- interceptors -->
+	<!-- 
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/admin/formQuestion"/>
+			<mvc:mapping path="/admin/saveQuestion"/>
+			<mvc:mapping path="/admin/testerList"/>
+			<mvc:mapping path="/admin/testContent"/>
+			<mvc:mapping path="/admin/makeExcelTestResult"/>
+			<mvc:mapping path="/formTest"/>
+			<beans:bean class="kr.co.bsc.www.interceptor.AuthInterceptor"/>
+		</mvc:interceptor>
+	</mvc:interceptors> 
+	 -->
 </beans:beans>
